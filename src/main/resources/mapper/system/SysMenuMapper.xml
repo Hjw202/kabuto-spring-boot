@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kabuto.cloud.dao.system.SysMenuMapper">
+
+    <!-- 查询全部路由菜单（超管用） -->
+    <select id="selectAllRouters" resultType="com.kabuto.cloud.entity.system.SysMenu">
+        SELECT
+            menu_id,
+            parent_id,
+            name,
+            sort,
+            icon,
+            router,
+            component,
+            query,
+            is_frame,
+            is_cache,
+            menu_type,
+            status,
+            visible,
+            rule
+        FROM sys_menu
+        WHERE menu_type IN (1, 2)
+          AND status = 1
+          AND deleted = 0
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 根据用户ID查询路由菜单（普通用户用） -->
+    <select id="selectRoutersByUserId" resultType="com.kabuto.cloud.entity.system.SysMenu">
+        SELECT DISTINCT
+            m.menu_id,
+            m.parent_id,
+            m.name,
+            m.sort,
+            m.icon,
+            m.router,
+            m.component,
+            m.query,
+            m.is_frame,
+            m.is_cache,
+            m.menu_type,
+            m.status,
+            m.visible,
+            m.rule
+        FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON m.menu_id = rm.menu_id
+        INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        INNER JOIN sys_role r ON rm.role_id = r.role_id AND r.status = 1 AND r.deleted = 0
+        WHERE ur.user_id = #{userId}
+          AND m.menu_type IN (1, 2)
+          AND m.status = 1
+          AND m.deleted = 0
+        ORDER BY m.sort ASC
+    </select>
+
+</mapper>

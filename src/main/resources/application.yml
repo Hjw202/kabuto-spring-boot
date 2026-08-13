@@ -1,0 +1,128 @@
+spring:
+  application:
+    name: kabuto-spring-boot
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/kabuto_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: kabuto
+    password: kabuto@2026
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      # 初始化连接数
+      initial-size: 5
+      # 最小连接数
+      min-idle: 5
+      # 最大连接数
+      max-active: 20
+      # 获取连接等待超时时间（毫秒）
+      max-wait: 60000
+      # 检测空闲连接的间隔（毫秒）
+      time-between-eviction-runs-millis: 60000
+      # 连接在池中最小生存时间（毫秒）
+      min-evictable-idle-time-millis: 300000
+      # 验证连接有效的 SQL
+      validation-query: SELECT 1
+      # 申请连接时检测
+      test-while-idle: true
+      # 归还连接时检测
+      test-on-borrow: false
+      # 申请连接时检测
+      test-on-return: false
+      # 是否缓存 PreparedStatement
+      pool-prepared-statements: true
+      # 最大缓存 PreparedStatement 数
+      max-pool-prepared-statement-per-connection-size: 20
+      # 开启监控和统计功能
+      stat:
+        merge-sql: true
+        log-slow-sql: true
+        slow-sql-millis: 2000
+      # 过滤器配置
+      filters: stat,wall
+      # Web 监控页面（可选，生产环境建议关闭或加鉴权）
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+
+  # Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: kabuto@2026
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          # 最大活跃连接数
+          max-active: 8
+          # 最大空闲连接数
+          max-idle: 8
+          # 最小空闲连接数
+          min-idle: 0
+          # 最大等待时间
+          max-wait: -1ms
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# JWT 配置
+jwt:
+  # 密钥（生产环境请替换为强随机字符串）
+  secret: kabuto-spring-boot-jwt-secret-key-2026-change-in-production
+  # Token 过期时间：2小时（单位：毫秒）
+  expires: 7200000
+  # 请求头名称
+  header: Authorization
+  # Token 前缀
+  prefix: "Bearer "
+
+# MyBatis Plus 配置
+mybatis-plus:
+  # Mapper XML 文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包扫描路径
+  type-aliases-package: com.kabuto.cloud.**.entity
+  configuration:
+    # 开启驼峰命名自动映射（下划线转驼峰）
+    map-underscore-to-camel-case: true
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 开启缓存
+    cache-enabled: true
+  global-config:
+    db-config:
+      # 全局主键类型：AUTO 为数据库自增
+      id-type: auto
+      # 全局逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除值（已删除）
+      logic-delete-value: 1
+      # 逻辑删除值（未删除）
+      logic-not-delete-value: 0
+
+# SpringDoc OpenAPI 配置
+springdoc:
+  # API Docs 路径配置
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  # Swagger UI 配置
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    # 默认展开深度（0=全部折叠，-1=全部展开）
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    # 操作排序：method（按 HTTP 方法）、alpha（按字母）
+    operations-sorter: method
+    # 标签排序
+    tags-sorter: alpha
+  # 扫描包路径
+  packages-to-scan: com.kabuto.cloud.controller
