@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysDictDataMapper;
 import com.kabuto.cloud.dao.system.SysDictTypeMapper;
 import com.kabuto.cloud.dto.system.CreateDictTypeDTO;
@@ -55,7 +54,7 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
     }
 
     @Override
-    public R<PageResult<DictTypeVO>> page(Integer pageNum, Integer pageSize, SearchDictTypeDTO dto) {
+    public PageResult<DictTypeVO> page(Integer pageNum, Integer pageSize, SearchDictTypeDTO dto) {
         LambdaQueryWrapper<SysDictType> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getDictName()), SysDictType::getDictName, dto.getDictName())
                 .like(StringUtils.hasText(dto.getDictType()), SysDictType::getDictType, dto.getDictType())
@@ -69,11 +68,11 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
                 .map(this::convertToDictTypeVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<List<DictTypeVO>> optionselect() {
+    public List<DictTypeVO> optionselect() {
         List<SysDictType> types = dictTypeMapper.selectList(
                 new LambdaQueryWrapper<SysDictType>()
                         .eq(SysDictType::getStatus, 1)
@@ -83,21 +82,21 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
                 .map(this::convertToDictTypeVO)
                 .collect(Collectors.toList());
 
-        return R.ok(voList);
+        return voList;
     }
 
     @Override
-    public R<DictTypeVO> getDictTypeById(Long id) {
+    public DictTypeVO getDictTypeById(Long id) {
         SysDictType dictType = dictTypeMapper.selectById(id);
         if (dictType == null) {
-            return R.notFound("字典类型不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "字典类型不存在");
         }
-        return R.ok(convertToDictTypeVO(dictType));
+        return convertToDictTypeVO(dictType);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createDictType(CreateDictTypeDTO dto) {
+    public void createDictType(CreateDictTypeDTO dto) {
         // 校验字典类型唯一
         Long existCount = dictTypeMapper.selectCount(
                 new LambdaQueryWrapper<SysDictType>().eq(SysDictType::getDictType, dto.getDictType()));
@@ -114,12 +113,11 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
         dictTypeMapper.insert(dictType);
 
         log.info("[创建字典类型] dictTypeId={}, dictType={}", dictType.getDictTypeId(), dictType.getDictType());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateDictType(Long id, UpdateDictTypeDTO dto) {
+    public void updateDictType(Long id, UpdateDictTypeDTO dto) {
         SysDictType dictType = dictTypeMapper.selectById(id);
         if (dictType == null) {
             throw new BizException(ResultCode.NOT_FOUND, "字典类型不存在");
@@ -163,14 +161,13 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
         dictDataService.refreshCacheByType(dictType.getDictType());
 
         log.info("[更新字典类型] dictTypeId={}", id);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteDictTypes(List<Long> ids) {
+    public void deleteDictTypes(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         for (Long id : ids) {
@@ -194,11 +191,10 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
         }
 
         log.info("[批量删除字典类型] ids={}", ids);
-        return R.ok();
     }
 
     @Override
-    public R<Void> refreshDictCache() {
+    public void refreshDictCache() {
         dictDataService.clearDictCache();
 
         // 重新加载所有字典数据到缓存
@@ -209,7 +205,6 @@ public class SysDictTypeServiceImpl implements SysDictTypeService {
         }
 
         log.info("[刷新字典缓存] typeCount={}", allTypes.size());
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysRoleMapper;
 import com.kabuto.cloud.dao.system.SysUserMapper;
 import com.kabuto.cloud.dto.system.CreateRoleDTO;
@@ -53,7 +52,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public R<PageResult<RoleVO>> page(Integer pageNum, Integer pageSize, SearchRoleDTO dto) {
+    public PageResult<RoleVO> page(Integer pageNum, Integer pageSize, SearchRoleDTO dto) {
         LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getName()), SysRole::getName, dto.getName())
                 .eq(StringUtils.hasText(dto.getRoleKey()), SysRole::getRoleKey, dto.getRoleKey())
@@ -67,11 +66,11 @@ public class SysRoleServiceImpl implements SysRoleService {
                 .map(this::convertToRoleVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<List<RoleVO>> getAllRoles() {
+    public List<RoleVO> getAllRoles() {
         List<SysRole> roles = roleMapper.selectList(
                 new LambdaQueryWrapper<SysRole>()
                         .eq(SysRole::getStatus, 1)
@@ -81,26 +80,26 @@ public class SysRoleServiceImpl implements SysRoleService {
                 .map(this::convertToRoleVO)
                 .collect(Collectors.toList());
 
-        return R.ok(voList);
+        return voList;
     }
 
     @Override
-    public R<RoleVO> getRoleDetail(Long id) {
+    public RoleVO getRoleDetail(Long id) {
         SysRole role = roleMapper.selectById(id);
         if (role == null) {
-            return R.notFound("角色不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "角色不存在");
         }
 
         RoleVO vo = convertToRoleVO(role);
         vo.setMenuIds(roleMapper.selectMenuIdsByRoleId(id));
         vo.setPermissionIds(roleMapper.selectPermissionIdsByRoleId(id));
 
-        return R.ok(vo);
+        return vo;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createRole(CreateRoleDTO dto) {
+    public void createRole(CreateRoleDTO dto) {
         // 校验角色名称唯一
         Long existCount = roleMapper.selectCount(
                 new LambdaQueryWrapper<SysRole>().eq(SysRole::getName, dto.getName()));
@@ -141,12 +140,11 @@ public class SysRoleServiceImpl implements SysRoleService {
         }
 
         log.info("[创建角色] roleId={}, name={}", role.getRoleId(), role.getName());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateRole(Long id, UpdateRoleDTO dto) {
+    public void updateRole(Long id, UpdateRoleDTO dto) {
         SysRole role = roleMapper.selectById(id);
         if (role == null) {
             throw new BizException(ResultCode.NOT_FOUND, "角色不存在");
@@ -206,12 +204,11 @@ public class SysRoleServiceImpl implements SysRoleService {
         refreshRoleUsersCache(id);
 
         log.info("[更新角色] roleId={}", id);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> changeStatus(Long id, Integer status) {
+    public void changeStatus(Long id, Integer status) {
         SysRole role = roleMapper.selectById(id);
         if (role == null) {
             throw new BizException(ResultCode.NOT_FOUND, "角色不存在");
@@ -228,14 +225,13 @@ public class SysRoleServiceImpl implements SysRoleService {
         }
 
         log.info("[启停角色状态] roleId={}, status={}", id, status);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteRoles(List<Long> ids) {
+    public void deleteRoles(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         // 校验不能删除超管角色（role_id=1）
@@ -261,19 +257,18 @@ public class SysRoleServiceImpl implements SysRoleService {
         }
 
         log.info("[批量删除角色] ids={}", ids);
-        return R.ok();
     }
 
     @Override
-    public R<RoleAuthorizeVO> getRoleAuthorize(Long id) {
+    public RoleAuthorizeVO getRoleAuthorize(Long id) {
         SysRole role = roleMapper.selectById(id);
         if (role == null) {
-            return R.notFound("角色不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "角色不存在");
         }
 
         RoleAuthorizeVO vo = new RoleAuthorizeVO();
         vo.setMenuIds(roleMapper.selectMenuIdsByRoleId(id));
-        return R.ok(vo);
+        return vo;
     }
 
     // ==================== 私有辅助方法 ====================

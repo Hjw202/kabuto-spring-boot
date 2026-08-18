@@ -47,7 +47,7 @@ public class SysNoticeController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchNoticeDTO dto) {
-        return noticeService.page(pageNum, pageSize, dto);
+        return R.ok(noticeService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -57,7 +57,7 @@ public class SysNoticeController {
     @RequirePermission("system:notice:query")
     @GetMapping("/{id}")
     public R<NoticeVO> detail(@PathVariable Long id) {
-        return noticeService.getNoticeById(id);
+        return R.ok(noticeService.getNoticeById(id));
     }
 
     /**
@@ -67,7 +67,8 @@ public class SysNoticeController {
     @RequirePermission("system:notice:add")
     @PostMapping("/")
     public R<Void> create(@Valid @RequestBody CreateNoticeDTO dto) {
-        return noticeService.createNotice(dto);
+        noticeService.createNotice(dto);
+        return R.ok();
     }
 
     /**
@@ -77,7 +78,8 @@ public class SysNoticeController {
     @RequirePermission("system:notice:edit")
     @PutMapping("/")
     public R<Void> update(@Valid @RequestBody UpdateNoticeDTO dto) {
-        return noticeService.updateNotice(dto.getId(), dto);
+        noticeService.updateNotice(dto.getId(), dto);
+        return R.ok();
     }
 
     /**
@@ -87,6 +89,7 @@ public class SysNoticeController {
     @RequirePermission("system:notice:remove")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return noticeService.deleteNotices(ids);
+        noticeService.deleteNotices(ids);
+        return R.ok();
     }
 }

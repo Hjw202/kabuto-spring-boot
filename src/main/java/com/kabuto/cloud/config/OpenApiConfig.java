@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * SpringDoc OpenAPI 配置类
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * </p>
  */
 @Configuration
+@Profile("!prod")
 public class OpenApiConfig {
 
     @Bean

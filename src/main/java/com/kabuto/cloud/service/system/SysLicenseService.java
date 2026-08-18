@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.*;
 import com.kabuto.cloud.vo.system.LicenseActivateVO;
 import com.kabuto.cloud.vo.system.LicenseVO;
@@ -16,15 +15,15 @@ import com.kabuto.cloud.vo.system.LicenseVO;
 public interface SysLicenseService {
 
     // 客户端接口（通常 @Public）
-    R<LicenseActivateVO> activate(ActivateLicenseDTO dto);
-    R<ValidateResult> validate(ValidateLicenseDTO dto);
-    R<Boolean> deactivate(String licenseCode, String deviceFingerprint);
+    LicenseActivateVO activate(ActivateLicenseDTO dto);
+    ValidateResult validate(ValidateLicenseDTO dto);
+    boolean deactivate(String licenseCode, String deviceFingerprint);
     String getPublicKey();
 
     // 管理端接口
-    R<PageResult<LicenseVO>> page(Integer pageNum, Integer pageSize, SearchLicenseDTO dto);
-    R<LicenseVO> getLicenseDetail(Long licenseId);
-    R<LicenseVO> createLicense(CreateLicenseDTO dto);
+    PageResult<LicenseVO> page(Integer pageNum, Integer pageSize, SearchLicenseDTO dto);
+    LicenseVO getLicenseDetail(Long licenseId);
+    LicenseVO createLicense(CreateLicenseDTO dto);
 
     /**
      * 验证结果（简单封装）

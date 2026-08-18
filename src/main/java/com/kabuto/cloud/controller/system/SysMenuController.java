@@ -47,7 +47,7 @@ public class SysMenuController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchMenuDTO dto) {
-        return menuService.pageTree(pageNum, pageSize, dto);
+        return R.ok(menuService.pageTree(pageNum, pageSize, dto));
     }
 
     /**
@@ -56,7 +56,7 @@ public class SysMenuController {
     @Operation(summary = "查询所有菜单（树形）")
     @GetMapping("/list")
     public R<List<MenuVO>> list() {
-        return menuService.getMenuList();
+        return R.ok(menuService.getMenuList());
     }
 
     /**
@@ -66,7 +66,7 @@ public class SysMenuController {
     @RequirePermission("system:menu:query")
     @GetMapping("/detail")
     public R<MenuVO> detail(@RequestParam Long id) {
-        return menuService.getMenuById(id);
+        return R.ok(menuService.getMenuById(id));
     }
 
     /**
@@ -75,7 +75,7 @@ public class SysMenuController {
     @Operation(summary = "查询权限菜单列表")
     @GetMapping("/permissionList")
     public R<List<MenuVO>> permissionList() {
-        return menuService.getPermissionList();
+        return R.ok(menuService.getPermissionList());
     }
 
     /**
@@ -85,7 +85,8 @@ public class SysMenuController {
     @RequirePermission("system:menu:add")
     @PostMapping("/create")
     public R<Void> create(@Valid @RequestBody CreateMenuDTO dto) {
-        return menuService.createMenu(dto);
+        menuService.createMenu(dto);
+        return R.ok();
     }
 
     /**
@@ -95,7 +96,8 @@ public class SysMenuController {
     @RequirePermission("system:menu:edit")
     @PutMapping("/update/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateMenuDTO dto) {
-        return menuService.updateMenu(id, dto);
+        menuService.updateMenu(id, dto);
+        return R.ok();
     }
 
     /**
@@ -105,7 +107,8 @@ public class SysMenuController {
     @RequirePermission("system:menu:edit")
     @PutMapping("/changeState")
     public R<Void> changeStatus(@RequestParam Long menuId, @RequestParam Integer status) {
-        return menuService.changeStatus(menuId, status);
+        menuService.changeStatus(menuId, status);
+        return R.ok();
     }
 
     /**
@@ -115,6 +118,7 @@ public class SysMenuController {
     @RequirePermission("system:menu:remove")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
-        return menuService.deleteMenu(id);
+        menuService.deleteMenu(id);
+        return R.ok();
     }
 }

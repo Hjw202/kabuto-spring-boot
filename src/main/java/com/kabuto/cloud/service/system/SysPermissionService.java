@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.CreatePermissionDTO;
 import com.kabuto.cloud.dto.system.SearchPermissionDTO;
 import com.kabuto.cloud.dto.system.UpdatePermissionDTO;
@@ -21,30 +20,30 @@ public interface SysPermissionService {
     /**
      * 分页查询权限列表
      */
-    R<PageResult<PermissionVO>> page(Integer pageNum, Integer pageSize, SearchPermissionDTO dto);
+    PageResult<PermissionVO> page(Integer pageNum, Integer pageSize, SearchPermissionDTO dto);
 
     /**
      * 查询所有权限列表
      */
-    R<List<PermissionVO>> getAllPermissions();
+    List<PermissionVO> getAllPermissions();
 
     /**
      * 查询权限详情
      */
-    R<PermissionVO> getPermissionById(Long id);
+    PermissionVO getPermissionById(Long id);
 
     /**
      * 创建权限
      */
-    R<Void> createPermission(CreatePermissionDTO dto);
+    void createPermission(CreatePermissionDTO dto);
 
     /**
      * 更新权限
      */
-    R<Void> updatePermission(UpdatePermissionDTO dto);
+    void updatePermission(UpdatePermissionDTO dto);
 
     /**
      * 批量删除权限
      */
-    R<Void> deletePermissions(List<Long> ids);
+    void deletePermissions(List<Long> ids);
 }

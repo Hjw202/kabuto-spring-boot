@@ -3,10 +3,10 @@ package com.kabuto.cloud.service.impl.system;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysLoginInfoMapper;
 import com.kabuto.cloud.dto.system.SearchLoginInfoDTO;
 import com.kabuto.cloud.entity.system.SysLoginInfo;
+import com.kabuto.cloud.exception.BizException;
 import com.kabuto.cloud.service.system.SysLoginInfoService;
 import com.kabuto.cloud.vo.system.LoginInfoVO;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class SysLoginInfoServiceImpl implements SysLoginInfoService {
     }
 
     @Override
-    public R<PageResult<LoginInfoVO>> page(Integer pageNum, Integer pageSize, SearchLoginInfoDTO dto) {
+    public PageResult<LoginInfoVO> page(Integer pageNum, Integer pageSize, SearchLoginInfoDTO dto) {
         LambdaQueryWrapper<SysLoginInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasText(dto.getAccount()), SysLoginInfo::getAccount, dto.getAccount())
                 .like(StringUtils.hasText(dto.getIpAddress()), SysLoginInfo::getIpAddress, dto.getIpAddress())
@@ -56,23 +55,22 @@ public class SysLoginInfoServiceImpl implements SysLoginInfoService {
                 .map(this::convertToLoginInfoVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<Void> deleteLoginInfos(List<Long> ids) {
+    public void deleteLoginInfos(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
         for (Long id : ids) {
             loginInfoMapper.deleteById(id);
         }
         log.info("[批量删除登录日志] ids={}", ids);
-        return R.ok();
     }
 
     @Override
-    public R<Void> clear() {
+    public void clear() {
         try (Connection conn = dataSource.getConnection()) {
             ScriptRunner runner = new ScriptRunner(conn);
             runner.setLogWriter(null);
@@ -80,9 +78,8 @@ public class SysLoginInfoServiceImpl implements SysLoginInfoService {
             log.info("[清空登录日志]");
         } catch (Exception e) {
             log.error("[清空登录日志失败] error={}", e.getMessage(), e);
-            return R.fail("清空失败");
+            throw new BizException("清空失败");
         }
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

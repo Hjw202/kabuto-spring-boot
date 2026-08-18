@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysMenuMapper;
 import com.kabuto.cloud.dao.system.SysPermissionMapper;
 import com.kabuto.cloud.dto.system.CreateMenuDTO;
@@ -47,7 +46,7 @@ public class SysMenuServiceImpl implements SysMenuService {
     }
 
     @Override
-    public R<PageResult<MenuVO>> pageTree(Integer pageNum, Integer pageSize, SearchMenuDTO dto) {
+    public PageResult<MenuVO> pageTree(Integer pageNum, Integer pageSize, SearchMenuDTO dto) {
         LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getName()), SysMenu::getName, dto.getName())
                 .eq(dto.getStatus() != null, SysMenu::getStatus, dto.getStatus())
@@ -62,28 +61,28 @@ public class SysMenuServiceImpl implements SysMenuService {
         int toIndex = Math.min(fromIndex + pageSize, total);
         List<MenuVO> pageList = fromIndex < total ? tree.subList(fromIndex, toIndex) : new ArrayList<>();
 
-        return R.tableData(pageList, (long) total, pageNum, pageSize);
+        return new PageResult<>(pageList, (long) total, pageNum, pageSize);
     }
 
     @Override
-    public R<List<MenuVO>> getMenuList() {
+    public List<MenuVO> getMenuList() {
         List<SysMenu> allMenus = menuMapper.selectList(
                 new LambdaQueryWrapper<SysMenu>()
                         .orderByAsc(SysMenu::getSort));
-        return R.ok(buildTree(allMenus));
+        return buildTree(allMenus);
     }
 
     @Override
-    public R<MenuVO> getMenuById(Long id) {
+    public MenuVO getMenuById(Long id) {
         SysMenu menu = menuMapper.selectById(id);
         if (menu == null) {
-            return R.notFound("菜单不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "菜单不存在");
         }
-        return R.ok(convertToMenuVO(menu));
+        return convertToMenuVO(menu);
     }
 
     @Override
-    public R<List<MenuVO>> getPermissionList() {
+    public List<MenuVO> getPermissionList() {
         List<SysMenu> menus = menuMapper.selectList(
                 new LambdaQueryWrapper<SysMenu>()
                         .in(SysMenu::getMenuType, 1, 2)
@@ -92,12 +91,12 @@ public class SysMenuServiceImpl implements SysMenuService {
         List<MenuVO> voList = menus.stream()
                 .map(this::convertToMenuVO)
                 .collect(Collectors.toList());
-        return R.ok(voList);
+        return voList;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createMenu(CreateMenuDTO dto) {
+    public void createMenu(CreateMenuDTO dto) {
         SysMenu menu = new SysMenu();
         menu.setParentId(dto.getParentId() != null ? dto.getParentId() : 0L);
         menu.setName(dto.getName());
@@ -134,12 +133,11 @@ public class SysMenuServiceImpl implements SysMenuService {
         menuMapper.insert(menu);
 
         log.info("[创建菜单] menuId={}, name={}", menu.getMenuId(), menu.getName());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateMenu(Long id, UpdateMenuDTO dto) {
+    public void updateMenu(Long id, UpdateMenuDTO dto) {
         SysMenu menu = menuMapper.selectById(id);
         if (menu == null) {
             throw new BizException(ResultCode.NOT_FOUND, "菜单不存在");
@@ -171,12 +169,11 @@ public class SysMenuServiceImpl implements SysMenuService {
         menuMapper.updateById(menu);
 
         log.info("[更新菜单] menuId={}", id);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> changeStatus(Long menuId, Integer status) {
+    public void changeStatus(Long menuId, Integer status) {
         SysMenu menu = menuMapper.selectById(menuId);
         if (menu == null) {
             throw new BizException(ResultCode.NOT_FOUND, "菜单不存在");
@@ -188,12 +185,11 @@ public class SysMenuServiceImpl implements SysMenuService {
         menuMapper.updateById(menu);
 
         log.info("[启停菜单状态] menuId={}, status={}", menuId, status);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteMenu(Long id) {
+    public void deleteMenu(Long id) {
         SysMenu menu = menuMapper.selectById(id);
         if (menu == null) {
             throw new BizException(ResultCode.NOT_FOUND, "菜单不存在");
@@ -229,7 +225,6 @@ public class SysMenuServiceImpl implements SysMenuService {
         menuMapper.deleteById(id);
 
         log.info("[删除菜单] menuId={}", id);
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -17,6 +18,7 @@ public class KabutoSpringBootApplication {
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
+	@Profile("!prod")
 	public void onApplicationReady() {
 		System.out.println("\n");
 		System.out.println("\033[32m" +

@@ -4,7 +4,6 @@ import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.LoginStatusEnum;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.exception.BizException;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.security.config.SecurityProperties;
 import com.kabuto.cloud.security.jwt.JwtUtil;
 import com.kabuto.cloud.dto.system.LoginUserDTO;
@@ -70,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<LoginVO> login(LoginUserDTO dto, String ip, String userAgent) {
+    public LoginVO login(LoginUserDTO dto, String ip, String userAgent) {
         String username = dto.getUsername();
         String password = dto.getPassword();
 
@@ -222,7 +221,7 @@ public class AuthServiceImpl implements AuthService {
             loginVO.setToken(token);
             loginVO.setPermissions(permissionList);
 
-            return R.ok(loginVO);
+            return loginVO;
 
         } catch (BizException e) {
             throw e;
@@ -235,9 +234,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public R<Void> logout(String token) {
+    public void logout(String token) {
         if (!StringUtils.hasText(token) || !token.startsWith(Constants.TOKEN_PREFIX)) {
-            return R.ok();
+            return;
         }
 
         String realToken = token.substring(Constants.TOKEN_PREFIX.length()).trim();
@@ -250,12 +249,10 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.warn("[退出登录] Token 解析失败: {}", e.getMessage());
         }
-
-        return R.ok();
     }
 
     @Override
-    public R<List<RouterVO>> getRouters(Long userId) {
+    public List<RouterVO> getRouters(Long userId) {
         List<SysMenu> menus;
 
         if (isAdmin(userId)) {
@@ -267,19 +264,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (CollectionUtils.isEmpty(menus)) {
-            return R.ok(Collections.emptyList());
+            return Collections.emptyList();
         }
 
         // 转换为 VO（过滤系统字段）
-        List<RouterVO> routers = menus.stream()
+        return menus.stream()
                 .map(this::convertToRouterVO)
                 .collect(Collectors.toList());
-
-        return R.ok(routers);
     }
 
     @Override
-    public R<UserInfoVO> getInfo(Long userId) {
+    public UserInfoVO getInfo(Long userId) {
         // 1. 优先从 Redis 缓存获取
         String cacheKey = Constants.LOGIN_CACHE_TOKEN_KEY + userId;
         String cacheJson = redisTemplate.opsForValue().get(cacheKey);
@@ -287,7 +282,9 @@ public class AuthServiceImpl implements AuthService {
         if (StringUtils.hasText(cacheJson)) {
             try {
                 UserInfoVO cached = com.alibaba.fastjson2.JSON.parseObject(cacheJson, UserInfoVO.class);
-                return R.ok(cached);
+                if (cached != null) {
+                    return cached;
+                }
             } catch (Exception e) {
                 log.warn("[获取用户信息] Redis 缓存解析失败，回查数据库: {}", e.getMessage());
             }
@@ -296,7 +293,7 @@ public class AuthServiceImpl implements AuthService {
         // 2. 缓存未命中：查询数据库
         UserInfoVO userInfo = buildUserInfoFromDb(userId);
         if (userInfo == null) {
-            return R.fail("用户不存在");
+            throw new BizException("用户不存在");
         }
 
         // 3. 写入缓存
@@ -308,7 +305,7 @@ public class AuthServiceImpl implements AuthService {
                 TimeUnit.MILLISECONDS
         );
 
-        return R.ok(userInfo);
+        return userInfo;
     }
 
     @Override

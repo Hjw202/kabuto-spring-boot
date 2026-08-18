@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysDictDataMapper;
 import com.kabuto.cloud.dto.system.CreateDictDataDTO;
 import com.kabuto.cloud.dto.system.SearchDictDataDTO;
@@ -49,7 +48,7 @@ public class SysDictDataServiceImpl implements SysDictDataService {
     }
 
     @Override
-    public R<PageResult<DictDataVO>> page(Integer pageNum, Integer pageSize, SearchDictDataDTO dto) {
+    public PageResult<DictDataVO> page(Integer pageNum, Integer pageSize, SearchDictDataDTO dto) {
         LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getDictLabel()), SysDictData::getDictLabel, dto.getDictLabel())
                 .eq(StringUtils.hasText(dto.getDictType()), SysDictData::getDictType, dto.getDictType())
@@ -61,13 +60,13 @@ public class SysDictDataServiceImpl implements SysDictDataService {
                 .map(this::convertToDictDataVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<List<DictDataVO>> getDictsByType(String dictType) {
+    public List<DictDataVO> getDictsByType(String dictType) {
         if (!StringUtils.hasText(dictType)) {
-            return R.ok(Collections.emptyList());
+            return Collections.emptyList();
         }
 
         // 优先从 Redis 缓存读取
@@ -77,7 +76,7 @@ public class SysDictDataServiceImpl implements SysDictDataService {
         if (StringUtils.hasText(cacheJson)) {
             try {
                 List<DictDataVO> cached = JSON.parseArray(cacheJson, DictDataVO.class);
-                return R.ok(cached != null ? cached : Collections.emptyList());
+                return cached != null ? cached : Collections.emptyList();
             } catch (Exception e) {
                 log.warn("[字典缓存解析失败] dictType={}, error={}", dictType, e.getMessage());
             }
@@ -101,21 +100,21 @@ public class SysDictDataServiceImpl implements SysDictDataService {
             log.warn("[字典缓存写入失败] dictType={}, error={}", dictType, e.getMessage());
         }
 
-        return R.ok(voList);
+        return voList;
     }
 
     @Override
-    public R<DictDataVO> getDictDataById(Long id) {
+    public DictDataVO getDictDataById(Long id) {
         SysDictData dictData = dictDataMapper.selectById(id);
         if (dictData == null) {
-            return R.notFound("字典数据不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "字典数据不存在");
         }
-        return R.ok(convertToDictDataVO(dictData));
+        return convertToDictDataVO(dictData);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createDictData(CreateDictDataDTO dto) {
+    public void createDictData(CreateDictDataDTO dto) {
         SysDictData dictData = new SysDictData();
         dictData.setDictLabel(dto.getDictLabel());
         dictData.setDictValue(dto.getDictValue());
@@ -133,12 +132,11 @@ public class SysDictDataServiceImpl implements SysDictDataService {
         refreshCacheByType(dto.getDictType());
 
         log.info("[创建字典数据] dictDataId={}, dictType={}", dictData.getDictDataId(), dto.getDictType());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateDictData(Long id, UpdateDictDataDTO dto) {
+    public void updateDictData(Long id, UpdateDictDataDTO dto) {
         SysDictData dictData = dictDataMapper.selectById(id);
         if (dictData == null) {
             throw new BizException(ResultCode.NOT_FOUND, "字典数据不存在");
@@ -167,14 +165,13 @@ public class SysDictDataServiceImpl implements SysDictDataService {
         }
 
         log.info("[更新字典数据] dictDataId={}", id);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteDictData(List<Long> ids) {
+    public void deleteDictData(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         // 先收集所有涉及的 dictType，删除后需要刷新缓存
@@ -195,7 +192,6 @@ public class SysDictDataServiceImpl implements SysDictDataService {
         }
 
         log.info("[批量删除字典数据] ids={}", ids);
-        return R.ok();
     }
 
     @Override

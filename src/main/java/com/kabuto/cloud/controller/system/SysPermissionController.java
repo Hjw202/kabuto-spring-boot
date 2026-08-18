@@ -47,7 +47,7 @@ public class SysPermissionController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchPermissionDTO dto) {
-        return permissionService.page(pageNum, pageSize, dto);
+        return R.ok(permissionService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -56,7 +56,7 @@ public class SysPermissionController {
     @Operation(summary = "查询所有权限列表")
     @GetMapping("/all")
     public R<List<PermissionVO>> all() {
-        return permissionService.getAllPermissions();
+        return R.ok(permissionService.getAllPermissions());
     }
 
     /**
@@ -65,7 +65,7 @@ public class SysPermissionController {
     @Operation(summary = "查询权限详情")
     @GetMapping("/{id}")
     public R<PermissionVO> detail(@PathVariable Long id) {
-        return permissionService.getPermissionById(id);
+        return R.ok(permissionService.getPermissionById(id));
     }
 
     /**
@@ -75,7 +75,8 @@ public class SysPermissionController {
     @RequirePermission("system:permission:add")
     @PostMapping("/")
     public R<Void> create(@Valid @RequestBody CreatePermissionDTO dto) {
-        return permissionService.createPermission(dto);
+        permissionService.createPermission(dto);
+        return R.ok();
     }
 
     /**
@@ -85,7 +86,8 @@ public class SysPermissionController {
     @RequirePermission("system:permission:edit")
     @PutMapping("/")
     public R<Void> update(@Valid @RequestBody UpdatePermissionDTO dto) {
-        return permissionService.updatePermission(dto);
+        permissionService.updatePermission(dto);
+        return R.ok();
     }
 
     /**
@@ -95,6 +97,7 @@ public class SysPermissionController {
     @RequirePermission("system:permission:remove")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return permissionService.deletePermissions(ids);
+        permissionService.deletePermissions(ids);
+        return R.ok();
     }
 }

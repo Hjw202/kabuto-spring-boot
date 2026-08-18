@@ -47,7 +47,7 @@ public class SysConfigController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchConfigDTO dto) {
-        return configService.page(pageNum, pageSize, dto);
+        return R.ok(configService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -57,7 +57,7 @@ public class SysConfigController {
     @RequirePermission("system:config:query")
     @GetMapping("/{configId}")
     public R<ConfigVO> detail(@PathVariable Long configId) {
-        return configService.getConfigById(configId);
+        return R.ok(configService.getConfigById(configId));
     }
 
     /**
@@ -67,7 +67,8 @@ public class SysConfigController {
     @RequirePermission("system:config:add")
     @PostMapping("/")
     public R<Void> create(@Valid @RequestBody CreateConfigDTO dto) {
-        return configService.createConfig(dto);
+        configService.createConfig(dto);
+        return R.ok();
     }
 
     /**
@@ -77,7 +78,8 @@ public class SysConfigController {
     @RequirePermission("system:config:edit")
     @PutMapping("/")
     public R<Void> update(@Valid @RequestBody UpdateConfigDTO dto) {
-        return configService.updateConfig(dto);
+        configService.updateConfig(dto);
+        return R.ok();
     }
 
     /**
@@ -87,7 +89,8 @@ public class SysConfigController {
     @RequirePermission("system:config:edit")
     @DeleteMapping("/refreshCache")
     public R<Void> refreshCache() {
-        return configService.refreshCache();
+        configService.refreshCache();
+        return R.ok();
     }
 
     /**
@@ -97,6 +100,7 @@ public class SysConfigController {
     @RequirePermission("system:config:remove")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return configService.deleteConfigs(ids);
+        configService.deleteConfigs(ids);
+        return R.ok();
     }
 }

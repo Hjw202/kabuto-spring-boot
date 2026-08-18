@@ -47,7 +47,7 @@ public class SysDictDataController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchDictDataDTO dto) {
-        return dictDataService.page(pageNum, pageSize, dto);
+        return R.ok(dictDataService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -56,7 +56,7 @@ public class SysDictDataController {
     @Operation(summary = "根据字典类型查询字典数据")
     @GetMapping("/type/{type}")
     public R<List<DictDataVO>> getDicts(@PathVariable String type) {
-        return dictDataService.getDictsByType(type);
+        return R.ok(dictDataService.getDictsByType(type));
     }
 
     /**
@@ -66,7 +66,7 @@ public class SysDictDataController {
     @RequirePermission("system:dict:query")
     @GetMapping("/{id}")
     public R<DictDataVO> detail(@PathVariable Long id) {
-        return dictDataService.getDictDataById(id);
+        return R.ok(dictDataService.getDictDataById(id));
     }
 
     /**
@@ -76,7 +76,8 @@ public class SysDictDataController {
     @RequirePermission("system:dict:add")
     @PostMapping("/")
     public R<Void> create(@Valid @RequestBody CreateDictDataDTO dto) {
-        return dictDataService.createDictData(dto);
+        dictDataService.createDictData(dto);
+        return R.ok();
     }
 
     /**
@@ -86,7 +87,8 @@ public class SysDictDataController {
     @RequirePermission("system:dict:edit")
     @PutMapping("/")
     public R<Void> update(@Valid @RequestBody UpdateDictDataDTO dto) {
-        return dictDataService.updateDictData(dto.getId(), dto);
+        dictDataService.updateDictData(dto.getId(), dto);
+        return R.ok();
     }
 
     /**
@@ -96,6 +98,7 @@ public class SysDictDataController {
     @RequirePermission("system:dict:remove")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return dictDataService.deleteDictData(ids);
+        dictDataService.deleteDictData(ids);
+        return R.ok();
     }
 }

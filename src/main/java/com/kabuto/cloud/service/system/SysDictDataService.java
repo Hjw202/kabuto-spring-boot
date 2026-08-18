@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.CreateDictDataDTO;
 import com.kabuto.cloud.dto.system.SearchDictDataDTO;
 import com.kabuto.cloud.dto.system.UpdateDictDataDTO;
@@ -21,32 +20,32 @@ public interface SysDictDataService {
     /**
      * 分页查询字典数据
      */
-    R<PageResult<DictDataVO>> page(Integer pageNum, Integer pageSize, SearchDictDataDTO dto);
+    PageResult<DictDataVO> page(Integer pageNum, Integer pageSize, SearchDictDataDTO dto);
 
     /**
      * 根据字典类型查询字典数据（优先从 Redis 缓存读取）
      */
-    R<List<DictDataVO>> getDictsByType(String dictType);
+    List<DictDataVO> getDictsByType(String dictType);
 
     /**
      * 查询字典数据详情
      */
-    R<DictDataVO> getDictDataById(Long id);
+    DictDataVO getDictDataById(Long id);
 
     /**
      * 创建字典数据（更新 Redis 缓存）
      */
-    R<Void> createDictData(CreateDictDataDTO dto);
+    void createDictData(CreateDictDataDTO dto);
 
     /**
      * 更新字典数据（更新 Redis 缓存）
      */
-    R<Void> updateDictData(Long id, UpdateDictDataDTO dto);
+    void updateDictData(Long id, UpdateDictDataDTO dto);
 
     /**
      * 批量删除字典数据（更新 Redis 缓存）
      */
-    R<Void> deleteDictData(List<Long> ids);
+    void deleteDictData(List<Long> ids);
 
     /**
      * 刷新指定字典类型的 Redis 缓存

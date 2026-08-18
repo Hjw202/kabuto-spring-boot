@@ -42,7 +42,7 @@ public class SysLoginInfoController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchLoginInfoDTO dto) {
-        return loginInfoService.page(pageNum, pageSize, dto);
+        return R.ok(loginInfoService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -51,7 +51,8 @@ public class SysLoginInfoController {
     @Operation(summary = "批量删除登录日志")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return loginInfoService.deleteLoginInfos(ids);
+        loginInfoService.deleteLoginInfos(ids);
+        return R.ok();
     }
 
     /**
@@ -60,6 +61,7 @@ public class SysLoginInfoController {
     @Operation(summary = "清空登录日志")
     @DeleteMapping("/clear")
     public R<Void> clear() {
-        return loginInfoService.clear();
+        loginInfoService.clear();
+        return R.ok();
     }
 }

@@ -58,7 +58,8 @@ public class AuthController {
             @RequestHeader(value = "User-Agent", defaultValue = "") String userAgent) {
 
         String ip = request.getRemoteAddr();
-        return authService.login(dto, ip, userAgent);
+        LoginVO loginVO = authService.login(dto, ip, userAgent);
+        return R.ok(loginVO);
     }
 
     /**
@@ -69,7 +70,8 @@ public class AuthController {
     @GetMapping("/logout")
     public R<Void> logout(
             @RequestHeader(value = Constants.TOKEN_HEADER, defaultValue = "") String token) {
-        return authService.logout(token);
+        authService.logout(token);
+        return R.ok();
     }
 
     /**
@@ -79,7 +81,8 @@ public class AuthController {
     @GetMapping("/getRouters")
     public R<List<RouterVO>> getRouters() {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return authService.getRouters(userId);
+        List<RouterVO> routers = authService.getRouters(userId);
+        return R.ok(routers);
     }
 
     /**
@@ -89,6 +92,7 @@ public class AuthController {
     @GetMapping("/getInfo")
     public R<UserInfoVO> getInfo() {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return authService.getInfo(userId);
+        UserInfoVO info = authService.getInfo(userId);
+        return R.ok(info);
     }
 }

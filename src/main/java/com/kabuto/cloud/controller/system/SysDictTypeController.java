@@ -43,7 +43,7 @@ public class SysDictTypeController {
     @Operation(summary = "下拉选择字典类型")
     @GetMapping("/optionselect")
     public R<List<DictTypeVO>> optionselect() {
-        return dictTypeService.optionselect();
+        return R.ok(dictTypeService.optionselect());
     }
 
     /**
@@ -56,7 +56,7 @@ public class SysDictTypeController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchDictTypeDTO dto) {
-        return dictTypeService.page(pageNum, pageSize, dto);
+        return R.ok(dictTypeService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -65,7 +65,7 @@ public class SysDictTypeController {
     @Operation(summary = "查询字典类型详情")
     @GetMapping("/{id}")
     public R<DictTypeVO> detail(@PathVariable Long id) {
-        return dictTypeService.getDictTypeById(id);
+        return R.ok(dictTypeService.getDictTypeById(id));
     }
 
     /**
@@ -75,7 +75,8 @@ public class SysDictTypeController {
     @RequirePermission("system:dict:add")
     @PostMapping("/")
     public R<Void> create(@Valid @RequestBody CreateDictTypeDTO dto) {
-        return dictTypeService.createDictType(dto);
+        dictTypeService.createDictType(dto);
+        return R.ok();
     }
 
     /**
@@ -85,7 +86,8 @@ public class SysDictTypeController {
     @RequirePermission("system:dict:edit")
     @PutMapping("/")
     public R<Void> update(@Valid @RequestBody UpdateDictTypeDTO dto) {
-        return dictTypeService.updateDictType(dto.getId(), dto);
+        dictTypeService.updateDictType(dto.getId(), dto);
+        return R.ok();
     }
 
     /**
@@ -95,7 +97,8 @@ public class SysDictTypeController {
     @RequirePermission("system:dict:edit")
     @GetMapping("/refreshCache")
     public R<Void> refreshCache() {
-        return dictTypeService.refreshDictCache();
+        dictTypeService.refreshDictCache();
+        return R.ok();
     }
 
     /**
@@ -104,6 +107,7 @@ public class SysDictTypeController {
     @Operation(summary = "删除字典类型")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return dictTypeService.deleteDictTypes(ids);
+        dictTypeService.deleteDictTypes(ids);
+        return R.ok();
     }
 }

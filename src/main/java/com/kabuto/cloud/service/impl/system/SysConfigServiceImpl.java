@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysConfigMapper;
 import com.kabuto.cloud.dto.system.CreateConfigDTO;
 import com.kabuto.cloud.dto.system.SearchConfigDTO;
@@ -68,7 +67,7 @@ public class SysConfigServiceImpl implements SysConfigService {
     }
 
     @Override
-    public R<PageResult<ConfigVO>> page(Integer pageNum, Integer pageSize, SearchConfigDTO dto) {
+    public PageResult<ConfigVO> page(Integer pageNum, Integer pageSize, SearchConfigDTO dto) {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getConfigName()), SysConfig::getConfigName, dto.getConfigName())
                 .eq(StringUtils.hasText(dto.getConfigKey()), SysConfig::getConfigKey, dto.getConfigKey())
@@ -80,21 +79,21 @@ public class SysConfigServiceImpl implements SysConfigService {
                 .map(this::convertToConfigVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<ConfigVO> getConfigById(Long id) {
+    public ConfigVO getConfigById(Long id) {
         SysConfig config = configMapper.selectById(id);
         if (config == null) {
-            return R.notFound("配置不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "配置不存在");
         }
-        return R.ok(convertToConfigVO(config));
+        return convertToConfigVO(config);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createConfig(CreateConfigDTO dto) {
+    public void createConfig(CreateConfigDTO dto) {
         // 校验 configKey 唯一
         Long existCount = configMapper.selectCount(
                 new LambdaQueryWrapper<SysConfig>().eq(SysConfig::getConfigKey, dto.getConfigKey()));
@@ -116,12 +115,11 @@ public class SysConfigServiceImpl implements SysConfigService {
         redisTemplate.opsForValue().set(cacheKey, dto.getConfigValue(), 24, TimeUnit.HOURS);
 
         log.info("[创建配置] configId={}, configKey={}", config.getConfigId(), dto.getConfigKey());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateConfig(UpdateConfigDTO dto) {
+    public void updateConfig(UpdateConfigDTO dto) {
         SysConfig config = configMapper.selectById(dto.getId());
         if (config == null) {
             throw new BizException(ResultCode.NOT_FOUND, "配置不存在");
@@ -157,14 +155,13 @@ public class SysConfigServiceImpl implements SysConfigService {
         configMapper.updateById(config);
 
         log.info("[更新配置] configId={}", dto.getId());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteConfigs(List<Long> ids) {
+    public void deleteConfigs(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         for (Long id : ids) {
@@ -186,11 +183,10 @@ public class SysConfigServiceImpl implements SysConfigService {
         }
 
         log.info("[批量删除配置] ids={}", ids);
-        return R.ok();
     }
 
     @Override
-    public R<Void> refreshCache() {
+    public void refreshCache() {
         // 清空所有配置缓存
         try {
             java.util.Set<String> keys = redisTemplate.keys(Constants.SYS_CONFIG_KEY + "*");
@@ -205,7 +201,6 @@ public class SysConfigServiceImpl implements SysConfigService {
         loadingConfigCache();
 
         log.info("[刷新配置缓存]");
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

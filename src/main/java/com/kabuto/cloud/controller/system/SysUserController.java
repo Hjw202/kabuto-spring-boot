@@ -50,7 +50,7 @@ public class SysUserController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchUserDTO dto) {
-        return userService.page(pageNum, pageSize, dto);
+        return R.ok(userService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -87,7 +87,8 @@ public class SysUserController {
     @Operation(summary = "创建用户")
     @PostMapping("/create")
     public R<Void> create(@Valid @RequestBody CreateUserDTO dto) {
-        return userService.createUser(dto);
+        userService.createUser(dto);
+        return R.ok();
     }
 
     /**
@@ -97,7 +98,8 @@ public class SysUserController {
     @RequirePermission("system:user:edit")
     @PutMapping("/update/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateUserDTO dto) {
-        return userService.updateUser(id, dto);
+        userService.updateUser(id, dto);
+        return R.ok();
     }
 
     /**
@@ -108,7 +110,8 @@ public class SysUserController {
     @RequireSuperAdmin
     @PostMapping("/status")
     public R<Void> changeStatus(@RequestParam Long id, @RequestParam Integer status) {
-        return userService.changeStatus(id, status);
+        userService.changeStatus(id, status);
+        return R.ok();
     }
 
     /**
@@ -119,7 +122,8 @@ public class SysUserController {
     @RequireSuperAdmin
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return userService.deleteUsers(ids);
+        userService.deleteUsers(ids);
+        return R.ok();
     }
 
     /**
@@ -130,7 +134,8 @@ public class SysUserController {
     @RequireSuperAdmin
     @PostMapping("/batchDelete")
     public R<Void> batchDelete(@RequestBody List<Long> ids) {
-        return userService.deleteUsers(ids);
+        userService.deleteUsers(ids);
+        return R.ok();
     }
 
     /**
@@ -141,7 +146,8 @@ public class SysUserController {
     @RequireSuperAdmin
     @PutMapping("/resetpwd")
     public R<Void> resetPwd(@Valid @RequestBody ResetPwdDTO dto) {
-        return userService.resetPwd(dto);
+        userService.resetPwd(dto);
+        return R.ok();
     }
 
     // ==================== 角色分配 ====================
@@ -166,7 +172,7 @@ public class SysUserController {
     @RequirePermission("system:user:query")
     @GetMapping("/authorize")
     public R<SysUserService.AuthorizeVO> getUserAuthorize(@RequestParam Long id) {
-        return userService.getUserAuthorize(id);
+        return R.ok(userService.getUserAuthorize(id));
     }
 
     /**
@@ -176,7 +182,8 @@ public class SysUserController {
     @RequirePermission("system:user:edit")
     @PutMapping("/authorize/save")
     public R<Void> saveAuthorize(@RequestBody SaveAuthorizeDTO dto) {
-        return userService.saveAuthorize(dto.getUserId(), dto.getRoleIds(), dto.getPermissionIds());
+        userService.saveAuthorize(dto.getUserId(), dto.getRoleIds(), dto.getPermissionIds());
+        return R.ok();
     }
 
     // ==================== 个人中心 ====================
@@ -188,7 +195,7 @@ public class SysUserController {
     @GetMapping("/profile")
     public R<UserVO> getUserProfile() {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return userService.getUserProfile(userId);
+        return R.ok(userService.getUserProfile(userId));
     }
 
     /**
@@ -198,7 +205,8 @@ public class SysUserController {
     @PutMapping("/profile")
     public R<Void> updateProfile(@Valid @RequestBody UpdateProfileDTO dto) {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return userService.updateProfile(userId, dto);
+        userService.updateProfile(userId, dto);
+        return R.ok();
     }
 
     /**
@@ -208,7 +216,8 @@ public class SysUserController {
     @PutMapping("/profile/updatePwd")
     public R<Void> updatePwd(@RequestBody UpdatePwdDTO dto) {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return userService.updatePwd(userId, dto.getOldPassword(), dto.getNewPassword());
+        userService.updatePwd(userId, dto.getOldPassword(), dto.getNewPassword());
+        return R.ok();
     }
 
     /**
@@ -218,7 +227,8 @@ public class SysUserController {
     @PostMapping("/profile/avatar")
     public R<Void> updateAvatar(@RequestParam String avatar) {
         Long userId = Long.valueOf(SecurityContext.getUserId());
-        return userService.updateAvatar(userId, avatar);
+        userService.updateAvatar(userId, avatar);
+        return R.ok();
     }
 
     // ==================== 内部DTO ====================

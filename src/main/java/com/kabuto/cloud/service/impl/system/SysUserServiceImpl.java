@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.constant.Constants;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysPermissionMapper;
 import com.kabuto.cloud.dao.system.SysRoleMapper;
 import com.kabuto.cloud.dao.system.SysUserMapper;
@@ -64,7 +63,7 @@ public class SysUserServiceImpl implements SysUserService {
     // ==================== 用户管理 ====================
 
     @Override
-    public R<PageResult<UserVO>> page(Integer pageNum, Integer pageSize, SearchUserDTO dto) {
+    public PageResult<UserVO> page(Integer pageNum, Integer pageSize, SearchUserDTO dto) {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getUsername()), SysUser::getUsername, dto.getUsername())
                 .eq(dto.getStatus() != null, SysUser::getStatus, dto.getStatus())
@@ -77,7 +76,7 @@ public class SysUserServiceImpl implements SysUserService {
                 .map(u -> convertToUserVO(u, false))
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
@@ -100,7 +99,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createUser(CreateUserDTO dto) {
+    public void createUser(CreateUserDTO dto) {
         // 1. 校验用户名唯一
         Long existCount = userMapper.selectCount(
                 new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, dto.getUsername()));
@@ -148,12 +147,11 @@ public class SysUserServiceImpl implements SysUserService {
         }
 
         log.info("[创建用户] userId={}, username={}", user.getUserId(), user.getUsername());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updateUser(Long id, UpdateUserDTO dto) {
+    public void updateUser(Long id, UpdateUserDTO dto) {
         SysUser user = userMapper.selectById(id);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -205,12 +203,11 @@ public class SysUserServiceImpl implements SysUserService {
         authService.refreshUserInfo(id);
 
         log.info("[更新用户] userId={}", id);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> changeStatus(Long id, Integer status) {
+    public void changeStatus(Long id, Integer status) {
         SysUser user = userMapper.selectById(id);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -227,14 +224,13 @@ public class SysUserServiceImpl implements SysUserService {
         }
 
         log.info("[启停用户状态] userId={}, status={}", id, status);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteUsers(List<Long> ids) {
+    public void deleteUsers(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         // 校验不能删除超管
@@ -253,12 +249,11 @@ public class SysUserServiceImpl implements SysUserService {
         }
 
         log.info("[批量删除用户] ids={}", ids);
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> resetPwd(ResetPwdDTO dto) {
+    public void resetPwd(ResetPwdDTO dto) {
         SysUser user = userMapper.selectById(dto.getId());
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -273,7 +268,6 @@ public class SysUserServiceImpl implements SysUserService {
         clearUserTokens(dto.getId());
 
         log.info("[重置密码] userId={}", dto.getId());
-        return R.ok();
     }
 
     @Override
@@ -286,16 +280,16 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public R<AuthorizeVO> getUserAuthorize(Long id) {
+    public AuthorizeVO getUserAuthorize(Long id) {
         AuthorizeVO vo = new AuthorizeVO();
         vo.setRoles(userMapper.selectRoleIdsByUserId(id));
         vo.setPermissions(userMapper.selectPermissionIdsByUserId(id));
-        return R.ok(vo);
+        return vo;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> saveAuthorize(Long userId, List<Long> roleIds, List<Long> permissionIds) {
+    public void saveAuthorize(Long userId, List<Long> roleIds, List<Long> permissionIds) {
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -321,17 +315,16 @@ public class SysUserServiceImpl implements SysUserService {
         authService.refreshUserInfo(userId);
 
         log.info("[保存授权] userId={}, roleIds={}, permissionIds={}", userId, roleIds, permissionIds);
-        return R.ok();
     }
 
     // ==================== 个人中心 ====================
 
     @Override
-    public R<UserVO> getUserProfile(Long userId) {
+    public UserVO getUserProfile(Long userId) {
         // 使用关联查询加载角色信息
         SysUser user = userMapper.selectUserWithRolesAndPermissionsById(userId);
         if (user == null) {
-            return R.fail("用户不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
         }
         UserVO vo = convertToUserVO(user, true);
         // 补充 roleGroup（逗号分隔的角色名称）
@@ -341,11 +334,11 @@ public class SysUserServiceImpl implements SysUserService {
                     .collect(Collectors.joining(", "));
             log.debug("[个人信息] userId={}, roleGroup={}", userId, roleGroup);
         }
-        return R.ok(vo);
+        return vo;
     }
 
     @Override
-    public R<Void> updateProfile(Long userId, UpdateProfileDTO dto) {
+    public void updateProfile(Long userId, UpdateProfileDTO dto) {
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -360,12 +353,10 @@ public class SysUserServiceImpl implements SysUserService {
 
         // 刷新 Redis 缓存
         authService.refreshUserInfo(userId);
-
-        return R.ok();
     }
 
     @Override
-    public R<Void> updateAvatar(Long userId, String avatar) {
+    public void updateAvatar(Long userId, String avatar) {
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -377,12 +368,10 @@ public class SysUserServiceImpl implements SysUserService {
 
         // 刷新 Redis 缓存
         authService.refreshUserInfo(userId);
-
-        return R.ok();
     }
 
     @Override
-    public R<Void> updatePwd(Long userId, String oldPwd, String newPwd) {
+    public void updatePwd(Long userId, String oldPwd, String newPwd) {
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
             throw new BizException(ResultCode.NOT_FOUND, "用户不存在");
@@ -398,7 +387,6 @@ public class SysUserServiceImpl implements SysUserService {
         userMapper.updateById(user);
 
         log.info("[修改密码] userId={}", userId);
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

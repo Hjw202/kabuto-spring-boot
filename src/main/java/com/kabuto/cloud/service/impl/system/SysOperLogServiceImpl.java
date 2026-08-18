@@ -3,10 +3,10 @@ package com.kabuto.cloud.service.impl.system;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysOperLogMapper;
 import com.kabuto.cloud.dto.system.SearchOperLogDTO;
 import com.kabuto.cloud.entity.system.SysOperLog;
+import com.kabuto.cloud.exception.BizException;
 import com.kabuto.cloud.service.system.SysOperLogService;
 import com.kabuto.cloud.vo.system.OperLogVO;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class SysOperLogServiceImpl implements SysOperLogService {
     }
 
     @Override
-    public R<PageResult<OperLogVO>> page(Integer pageNum, Integer pageSize, SearchOperLogDTO dto) {
+    public PageResult<OperLogVO> page(Integer pageNum, Integer pageSize, SearchOperLogDTO dto) {
         LambdaQueryWrapper<SysOperLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getTitle()), SysOperLog::getTitle, dto.getTitle())
                 .eq(dto.getBusinessType() != null, SysOperLog::getBusinessType, dto.getBusinessType())
@@ -56,23 +56,22 @@ public class SysOperLogServiceImpl implements SysOperLogService {
                 .map(this::convertToOperLogVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<Void> deleteOperLogs(List<Long> ids) {
+    public void deleteOperLogs(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
         for (Long id : ids) {
             operLogMapper.deleteById(id);
         }
         log.info("[批量删除操作日志] ids={}", ids);
-        return R.ok();
     }
 
     @Override
-    public R<Void> clear() {
+    public void clear() {
         try (Connection conn = dataSource.getConnection()) {
             ScriptRunner runner = new ScriptRunner(conn);
             runner.setLogWriter(null);
@@ -80,9 +79,8 @@ public class SysOperLogServiceImpl implements SysOperLogService {
             log.info("[清空操作日志]");
         } catch (Exception e) {
             log.error("[清空操作日志失败] error={}", e.getMessage(), e);
-            return R.fail("清空失败");
+            throw new BizException("清空失败");
         }
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

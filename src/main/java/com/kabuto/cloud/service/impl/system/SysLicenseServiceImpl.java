@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysLicenseDeviceMapper;
 import com.kabuto.cloud.dao.system.SysLicenseMapper;
 import com.kabuto.cloud.dto.system.*;
@@ -58,7 +57,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<LicenseActivateVO> activate(ActivateLicenseDTO dto) {
+    public LicenseActivateVO activate(ActivateLicenseDTO dto) {
         String code = normalizeLicenseCode(dto.getLicenseCode());
 
         // 查找授权码
@@ -129,7 +128,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
     }
 
     @Override
-    public R<ValidateResult> validate(ValidateLicenseDTO dto) {
+    public ValidateResult validate(ValidateLicenseDTO dto) {
         String code = normalizeLicenseCode(dto.getLicenseCode());
         ValidateResult result = new ValidateResult();
 
@@ -139,21 +138,21 @@ public class SysLicenseServiceImpl implements SysLicenseService {
         if (license == null) {
             result.setValid(false);
             result.setError("LICENSE_NOT_FOUND");
-            return R.ok(result);
+            return result;
         }
 
         // 校验禁用
         if (Integer.valueOf(3).equals(license.getStatus())) {
             result.setValid(false);
             result.setError("LICENSE_DISABLED");
-            return R.ok(result);
+            return result;
         }
 
         // 校验过期
         if (license.getExpiresAt() != null && license.getExpiresAt().isBefore(LocalDateTime.now())) {
             result.setValid(false);
             result.setError("LICENSE_EXPIRED");
-            return R.ok(result);
+            return result;
         }
 
         // 查找设备绑定
@@ -166,7 +165,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
         if (device == null) {
             result.setValid(false);
             result.setError("DEVICE_NOT_ACTIVATED");
-            return R.ok(result);
+            return result;
         }
 
         // 更新最后验证时间
@@ -183,18 +182,18 @@ public class SysLicenseServiceImpl implements SysLicenseService {
                 device.getActivatedAt()));
         result.setData(data);
 
-        return R.ok(result);
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Boolean> deactivate(String licenseCode, String deviceFingerprint) {
+    public boolean deactivate(String licenseCode, String deviceFingerprint) {
         String code = normalizeLicenseCode(licenseCode);
 
         SysLicense license = licenseMapper.selectOne(
                 new LambdaQueryWrapper<SysLicense>().eq(SysLicense::getLicenseCode, code));
         if (license == null) {
-            return R.ok(false);
+            return false;
         }
 
         // 找到活跃的设备绑定并停用
@@ -205,7 +204,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
                         .eq(SysLicenseDevice::getIsActive, 1));
 
         if (device == null) {
-            return R.ok(false);
+            return false;
         }
 
         device.setIsActive(0);
@@ -213,7 +212,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
         licenseDeviceMapper.updateById(device);
 
         log.info("[解绑设备] licenseId={}, fingerprint={}", license.getLicenseId(), deviceFingerprint);
-        return R.ok(true);
+        return true;
     }
 
     @Override
@@ -224,7 +223,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
     // ==================== 管理端接口 ====================
 
     @Override
-    public R<PageResult<LicenseVO>> page(Integer pageNum, Integer pageSize, SearchLicenseDTO dto) {
+    public PageResult<LicenseVO> page(Integer pageNum, Integer pageSize, SearchLicenseDTO dto) {
         LambdaQueryWrapper<SysLicense> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(dto.getStatus() != null, SysLicense::getStatus, dto.getStatus())
                 .eq(StringUtils.hasText(dto.getPlanType()), SysLicense::getPlanType, dto.getPlanType())
@@ -235,21 +234,21 @@ public class SysLicenseServiceImpl implements SysLicenseService {
                 .map(this::convertToLicenseVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<LicenseVO> getLicenseDetail(Long licenseId) {
+    public LicenseVO getLicenseDetail(Long licenseId) {
         SysLicense license = licenseMapper.selectById(licenseId);
         if (license == null) {
-            return R.notFound("授权码不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "授权码不存在");
         }
-        return R.ok(convertToLicenseVO(license));
+        return convertToLicenseVO(license);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<LicenseVO> createLicense(CreateLicenseDTO dto) {
+    public LicenseVO createLicense(CreateLicenseDTO dto) {
         SysLicense license = new SysLicense();
         license.setLicenseCode(generateLicenseCode());
         license.setPlanType(dto.getPlanType());
@@ -263,7 +262,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
 
         log.info("[创建授权码] licenseId={}, code={}, planType={}",
                 license.getLicenseId(), license.getLicenseCode(), license.getPlanType());
-        return R.ok(convertToLicenseVO(license));
+        return convertToLicenseVO(license);
     }
 
     // ==================== 私有辅助方法 ====================
@@ -296,7 +295,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
     /**
      * 构建激活响应
      */
-    private R<LicenseActivateVO> buildActivateResponse(SysLicense license, String deviceFingerprint) {
+    private LicenseActivateVO buildActivateResponse(SysLicense license, String deviceFingerprint) {
         LocalDateTime activatedAt = license.getActivatedAt() != null ? license.getActivatedAt() : LocalDateTime.now();
         String signature = buildSignature(license, deviceFingerprint, activatedAt);
 
@@ -310,7 +309,7 @@ public class SysLicenseServiceImpl implements SysLicenseService {
         license.setSignature(signature);
         licenseMapper.updateById(license);
 
-        return R.ok(vo);
+        return vo;
     }
 
     /**

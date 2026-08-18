@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.SearchLoginInfoDTO;
 import com.kabuto.cloud.vo.system.LoginInfoVO;
 
@@ -19,15 +18,15 @@ public interface SysLoginInfoService {
     /**
      * 分页查询登录日志
      */
-    R<PageResult<LoginInfoVO>> page(Integer pageNum, Integer pageSize, SearchLoginInfoDTO dto);
+    PageResult<LoginInfoVO> page(Integer pageNum, Integer pageSize, SearchLoginInfoDTO dto);
 
     /**
      * 批量删除登录日志
      */
-    R<Void> deleteLoginInfos(List<Long> ids);
+    void deleteLoginInfos(List<Long> ids);
 
     /**
      * 清空登录日志（TRUNCATE 表）
      */
-    R<Void> clear();
+    void clear();
 }

@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.*;
 import com.kabuto.cloud.vo.system.UserVO;
 
@@ -19,7 +18,7 @@ public interface SysUserService {
     /**
      * 分页查询用户列表
      */
-    R<PageResult<UserVO>> page(Integer pageNum, Integer pageSize, SearchUserDTO dto);
+    PageResult<UserVO> page(Integer pageNum, Integer pageSize, SearchUserDTO dto);
 
     /**
      * 根据ID查询用户基本信息
@@ -34,27 +33,27 @@ public interface SysUserService {
     /**
      * 创建用户
      */
-    R<Void> createUser(CreateUserDTO dto);
+    void createUser(CreateUserDTO dto);
 
     /**
      * 编辑用户
      */
-    R<Void> updateUser(Long id, UpdateUserDTO dto);
+    void updateUser(Long id, UpdateUserDTO dto);
 
     /**
      * 启停用户状态
      */
-    R<Void> changeStatus(Long id, Integer status);
+    void changeStatus(Long id, Integer status);
 
     /**
      * 批量删除用户
      */
-    R<Void> deleteUsers(List<Long> ids);
+    void deleteUsers(List<Long> ids);
 
     /**
      * 管理员重置用户密码
      */
-    R<Void> resetPwd(ResetPwdDTO dto);
+    void resetPwd(ResetPwdDTO dto);
 
     /**
      * 查看用户角色
@@ -64,34 +63,34 @@ public interface SysUserService {
     /**
      * 查看用户授权信息（角色 + 权限）
      */
-    R<AuthorizeVO> getUserAuthorize(Long id);
+    AuthorizeVO getUserAuthorize(Long id);
 
     /**
      * 保存用户授权（角色 + 权限）
      */
-    R<Void> saveAuthorize(Long userId, List<Long> roleIds, List<Long> permissionIds);
+    void saveAuthorize(Long userId, List<Long> roleIds, List<Long> permissionIds);
 
     // ==================== 个人中心 ====================
 
     /**
      * 获取个人信息
      */
-    R<UserVO> getUserProfile(Long userId);
+    UserVO getUserProfile(Long userId);
 
     /**
      * 更新个人资料
      */
-    R<Void> updateProfile(Long userId, UpdateProfileDTO dto);
+    void updateProfile(Long userId, UpdateProfileDTO dto);
 
     /**
      * 更新头像
      */
-    R<Void> updateAvatar(Long userId, String avatar);
+    void updateAvatar(Long userId, String avatar);
 
     /**
      * 修改个人密码
      */
-    R<Void> updatePwd(Long userId, String oldPwd, String newPwd);
+    void updatePwd(Long userId, String oldPwd, String newPwd);
 
     /**
      * 授权信息 VO

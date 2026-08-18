@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.CreateNoticeDTO;
 import com.kabuto.cloud.dto.system.SearchNoticeDTO;
 import com.kabuto.cloud.dto.system.UpdateNoticeDTO;
@@ -21,25 +20,25 @@ public interface SysNoticeService {
     /**
      * 分页查询公告列表
      */
-    R<PageResult<NoticeVO>> page(Integer pageNum, Integer pageSize, SearchNoticeDTO dto);
+    PageResult<NoticeVO> page(Integer pageNum, Integer pageSize, SearchNoticeDTO dto);
 
     /**
      * 查询公告详情
      */
-    R<NoticeVO> getNoticeById(Long id);
+    NoticeVO getNoticeById(Long id);
 
     /**
      * 创建公告
      */
-    R<Void> createNotice(CreateNoticeDTO dto);
+    void createNotice(CreateNoticeDTO dto);
 
     /**
      * 更新公告
      */
-    R<Void> updateNotice(Long id, UpdateNoticeDTO dto);
+    void updateNotice(Long id, UpdateNoticeDTO dto);
 
     /**
      * 批量删除公告
      */
-    R<Void> deleteNotices(List<Long> ids);
+    void deleteNotices(List<Long> ids);
 }

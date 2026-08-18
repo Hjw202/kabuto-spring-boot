@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kabuto.cloud.common.enums.ResultCode;
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dao.system.SysPermissionMapper;
 import com.kabuto.cloud.dto.system.CreatePermissionDTO;
 import com.kabuto.cloud.dto.system.SearchPermissionDTO;
@@ -41,7 +40,7 @@ public class SysPermissionServiceImpl implements SysPermissionService {
     }
 
     @Override
-    public R<PageResult<PermissionVO>> page(Integer pageNum, Integer pageSize, SearchPermissionDTO dto) {
+    public PageResult<PermissionVO> page(Integer pageNum, Integer pageSize, SearchPermissionDTO dto) {
         LambdaQueryWrapper<SysPermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getName()), SysPermission::getName, dto.getName())
                 .eq(StringUtils.hasText(dto.getPerms()), SysPermission::getPerms, dto.getPerms())
@@ -53,11 +52,11 @@ public class SysPermissionServiceImpl implements SysPermissionService {
                 .map(this::convertToPermissionVO)
                 .collect(Collectors.toList());
 
-        return R.tableData(voList, page.getTotal(), pageNum, pageSize);
+        return new PageResult<>(voList, page.getTotal(), pageNum, pageSize);
     }
 
     @Override
-    public R<List<PermissionVO>> getAllPermissions() {
+    public List<PermissionVO> getAllPermissions() {
         List<SysPermission> permissions = permissionMapper.selectList(
                 new LambdaQueryWrapper<SysPermission>()
                         .orderByAsc(SysPermission::getCreateTime));
@@ -66,21 +65,21 @@ public class SysPermissionServiceImpl implements SysPermissionService {
                 .map(this::convertToPermissionVO)
                 .collect(Collectors.toList());
 
-        return R.ok(voList);
+        return voList;
     }
 
     @Override
-    public R<PermissionVO> getPermissionById(Long id) {
+    public PermissionVO getPermissionById(Long id) {
         SysPermission permission = permissionMapper.selectById(id);
         if (permission == null) {
-            return R.notFound("权限不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "权限不存在");
         }
-        return R.ok(convertToPermissionVO(permission));
+        return convertToPermissionVO(permission);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> createPermission(CreatePermissionDTO dto) {
+    public void createPermission(CreatePermissionDTO dto) {
         // 校验权限标识唯一
         Long existCount = permissionMapper.selectCount(
                 new LambdaQueryWrapper<SysPermission>().eq(SysPermission::getPerms, dto.getPerms()));
@@ -98,12 +97,11 @@ public class SysPermissionServiceImpl implements SysPermissionService {
         permissionMapper.insert(permission);
 
         log.info("[创建权限] permissionId={}, perms={}", permission.getPermissionId(), permission.getPerms());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> updatePermission(UpdatePermissionDTO dto) {
+    public void updatePermission(UpdatePermissionDTO dto) {
         SysPermission permission = permissionMapper.selectById(dto.getId());
         if (permission == null) {
             throw new BizException(ResultCode.NOT_FOUND, "权限不存在");
@@ -131,14 +129,13 @@ public class SysPermissionServiceImpl implements SysPermissionService {
         permissionMapper.updateById(permission);
 
         log.info("[更新权限] permissionId={}", dto.getId());
-        return R.ok();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deletePermissions(List<Long> ids) {
+    public void deletePermissions(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
-            return R.ok();
+            return;
         }
 
         for (Long id : ids) {
@@ -150,7 +147,6 @@ public class SysPermissionServiceImpl implements SysPermissionService {
         }
 
         log.info("[批量删除权限] ids={}", ids);
-        return R.ok();
     }
 
     // ==================== 私有辅助方法 ====================

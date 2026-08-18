@@ -1,7 +1,6 @@
 package com.kabuto.cloud.service.system;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.common.result.R;
 import com.kabuto.cloud.dto.system.SearchOperLogDTO;
 import com.kabuto.cloud.vo.system.OperLogVO;
 
@@ -19,15 +18,15 @@ public interface SysOperLogService {
     /**
      * 分页查询操作日志
      */
-    R<PageResult<OperLogVO>> page(Integer pageNum, Integer pageSize, SearchOperLogDTO dto);
+    PageResult<OperLogVO> page(Integer pageNum, Integer pageSize, SearchOperLogDTO dto);
 
     /**
      * 批量删除操作日志
      */
-    R<Void> deleteOperLogs(List<Long> ids);
+    void deleteOperLogs(List<Long> ids);
 
     /**
      * 清空操作日志（TRUNCATE 表）
      */
-    R<Void> clear();
+    void clear();
 }

@@ -42,7 +42,7 @@ public class SysOperLogController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchOperLogDTO dto) {
-        return operLogService.page(pageNum, pageSize, dto);
+        return R.ok(operLogService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -51,7 +51,8 @@ public class SysOperLogController {
     @Operation(summary = "批量删除操作日志")
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return operLogService.deleteOperLogs(ids);
+        operLogService.deleteOperLogs(ids);
+        return R.ok();
     }
 
     /**
@@ -60,6 +61,7 @@ public class SysOperLogController {
     @Operation(summary = "清空操作日志")
     @DeleteMapping("/clear")
     public R<Void> clear() {
-        return operLogService.clear();
+        operLogService.clear();
+        return R.ok();
     }
 }

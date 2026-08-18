@@ -45,7 +45,7 @@ public class SysLicenseController {
     @Public
     @PostMapping("/activate")
     public R<LicenseActivateVO> activate(@Valid @RequestBody ActivateLicenseDTO dto) {
-        return licenseService.activate(dto);
+        return R.ok(licenseService.activate(dto));
     }
 
     /**
@@ -55,7 +55,7 @@ public class SysLicenseController {
     @Public
     @PostMapping("/validate")
     public R<SysLicenseService.ValidateResult> validate(@Valid @RequestBody ValidateLicenseDTO dto) {
-        return licenseService.validate(dto);
+        return R.ok(licenseService.validate(dto));
     }
 
     /**
@@ -65,7 +65,7 @@ public class SysLicenseController {
     @Public
     @PostMapping("/deactivate")
     public R<Boolean> deactivate(@RequestBody DeactivateDTO dto) {
-        return licenseService.deactivate(dto.getLicenseCode(), dto.getDeviceFingerprint());
+        return R.ok(licenseService.deactivate(dto.getLicenseCode(), dto.getDeviceFingerprint()));
     }
 
     /**
@@ -86,7 +86,7 @@ public class SysLicenseController {
     @Operation(summary = "创建授权码（管理端）")
     @PostMapping("/admin/create")
     public R<LicenseVO> createLicense(@Valid @RequestBody CreateLicenseDTO dto) {
-        return licenseService.createLicense(dto);
+        return R.ok(licenseService.createLicense(dto));
     }
 
     /**
@@ -95,7 +95,7 @@ public class SysLicenseController {
     @Operation(summary = "查询授权码详情（管理端）")
     @GetMapping("/admin/detail")
     public R<LicenseVO> detail(@RequestParam Long licenseId) {
-        return licenseService.getLicenseDetail(licenseId);
+        return R.ok(licenseService.getLicenseDetail(licenseId));
     }
 
     /**
@@ -107,7 +107,7 @@ public class SysLicenseController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchLicenseDTO dto) {
-        return licenseService.page(page, pageSize, dto);
+        return R.ok(licenseService.page(page, pageSize, dto));
     }
 
     // ==================== 内部 DTO ====================

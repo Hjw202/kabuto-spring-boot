@@ -48,7 +48,7 @@ public class SysRoleController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             SearchRoleDTO dto) {
-        return roleService.page(pageNum, pageSize, dto);
+        return R.ok(roleService.page(pageNum, pageSize, dto));
     }
 
     /**
@@ -57,7 +57,7 @@ public class SysRoleController {
     @Operation(summary = "查询所有正常状态角色")
     @GetMapping("/list")
     public R<List<RoleVO>> list() {
-        return roleService.getAllRoles();
+        return R.ok(roleService.getAllRoles());
     }
 
     /**
@@ -67,7 +67,7 @@ public class SysRoleController {
     @RequirePermission("system:role:query")
     @GetMapping("/detail")
     public R<RoleVO> detail(@RequestParam Long id) {
-        return roleService.getRoleDetail(id);
+        return R.ok(roleService.getRoleDetail(id));
     }
 
     /**
@@ -77,7 +77,8 @@ public class SysRoleController {
     @RequirePermission("system:role:add")
     @PostMapping("/create")
     public R<Void> create(@Valid @RequestBody CreateRoleDTO dto) {
-        return roleService.createRole(dto);
+        roleService.createRole(dto);
+        return R.ok();
     }
 
     /**
@@ -87,7 +88,8 @@ public class SysRoleController {
     @RequirePermission("system:role:edit")
     @PutMapping("/update/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateRoleDTO dto) {
-        return roleService.updateRole(id, dto);
+        roleService.updateRole(id, dto);
+        return R.ok();
     }
 
     /**
@@ -98,7 +100,8 @@ public class SysRoleController {
     @RequireSuperAdmin
     @PostMapping("/status")
     public R<Void> changeStatus(@RequestParam Long id, @RequestParam Integer status) {
-        return roleService.changeStatus(id, status);
+        roleService.changeStatus(id, status);
+        return R.ok();
     }
 
     /**
@@ -109,7 +112,8 @@ public class SysRoleController {
     @RequireSuperAdmin
     @DeleteMapping("/{ids}")
     public R<Void> delete(@PathVariable List<Long> ids) {
-        return roleService.deleteRoles(ids);
+        roleService.deleteRoles(ids);
+        return R.ok();
     }
 
     /**
@@ -120,7 +124,8 @@ public class SysRoleController {
     @RequireSuperAdmin
     @PostMapping("/batchDelete")
     public R<Void> batchDelete(@RequestBody List<Long> ids) {
-        return roleService.deleteRoles(ids);
+        roleService.deleteRoles(ids);
+        return R.ok();
     }
 
     /**
@@ -130,6 +135,6 @@ public class SysRoleController {
     @RequirePermission("system:role:query")
     @GetMapping("/authorize")
     public R<SysRoleService.RoleAuthorizeVO> getRoleAuthorize(@RequestParam Long id) {
-        return roleService.getRoleAuthorize(id);
+        return R.ok(roleService.getRoleAuthorize(id));
     }
 }
