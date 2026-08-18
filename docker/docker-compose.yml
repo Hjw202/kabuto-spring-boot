@@ -18,8 +18,10 @@ services:
       - ${DOCKER_DATA_PATH}/mysql-kabuto/data:/var/lib/mysql
       # 日志持久化
       - ${DOCKER_DATA_PATH}/mysql-kabuto/logs:/var/log/mysql
-      # 初始化脚本
+      # 初始化脚本（用户创建 + 权限授予）
       - ./init-scripts:/docker-entrypoint-initdb.d
+      # 建表 SQL（单一数据源，避免重复维护）
+      - ../db/init.sql:/docker-entrypoint-initdb.d/01-schema.sql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci

@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class SysLoginInfo {
 
     /** 登录日志ID */
-    @TableId(value = "login_info_id", type = IdType.INPUT)
+    @TableId(value = "login_info_id", type = IdType.AUTO)
     private Long loginInfoId;
 
     /** 用户ID */

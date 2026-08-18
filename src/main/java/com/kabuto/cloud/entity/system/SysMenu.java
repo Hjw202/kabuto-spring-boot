@@ -19,7 +19,7 @@ import java.util.List;
 public class SysMenu {
 
     /** 菜单ID */
-    @TableId(value = "menu_id", type = IdType.INPUT)
+    @TableId(value = "menu_id", type = IdType.AUTO)
     private Long menuId;
 
     /** 父菜单ID */
@@ -52,7 +52,7 @@ public class SysMenu {
     @TableField("is_cache")
     private Integer isCache;
 
-    /** 菜单类型 1=目录 2=页面 3=按钮 */
+    /** 菜单类型 1=目录 2=菜单 3=按钮 */
     @TableField("menu_type")
     private Integer menuType;
 

@@ -40,6 +40,9 @@ public final class Constants {
     /** 限流计数缓存前缀 */
     public static final String THROTTLE_KEY = "throttle:";
 
+    /** 字典数据缓存前缀 */
+    public static final String SYS_DICT_KEY = "sys:dict:";
+
     // ==================== 编码相关 ====================
 
     /** UTF-8 字符集 */

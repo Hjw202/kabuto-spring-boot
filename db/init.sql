@@ -72,7 +72,7 @@ CREATE TABLE sys_menu (
     query           VARCHAR(255)                                COMMENT '路由参数',
     is_frame        TINYINT         DEFAULT 0                   COMMENT '是否外部链接 0=否 1=是',
     is_cache        TINYINT         DEFAULT 0                   COMMENT '是否缓存页面 0=否 1=是',
-    menu_type       TINYINT         DEFAULT 1                   COMMENT '菜单类型 1=目录 2=菜单 3=按钮',
+    menu_type       TINYINT         DEFAULT 1                   COMMENT '菜单类型 1=目录 2=页面 3=按钮',
     status          TINYINT         DEFAULT 1                   COMMENT '状态 0=停用 1=启用',
     visible         TINYINT         DEFAULT 1                   COMMENT '显示状态 0=隐藏 1=显示',
     rule            VARCHAR(100)                                COMMENT '权限标识',

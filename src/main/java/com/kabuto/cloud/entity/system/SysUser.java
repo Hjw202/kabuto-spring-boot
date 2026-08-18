@@ -20,7 +20,7 @@ import java.util.List;
 public class SysUser {
 
     /** 用户ID */
-    @TableId(value = "user_id", type = IdType.INPUT)
+    @TableId(value = "user_id", type = IdType.AUTO)
     private Long userId;
 
     /** 账号 */

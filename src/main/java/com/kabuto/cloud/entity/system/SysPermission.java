@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class SysPermission {
 
     /** 权限ID */
-    @TableId(value = "permission_id", type = IdType.INPUT)
+    @TableId(value = "permission_id", type = IdType.AUTO)
     private Long permissionId;
 
     /** 权限名称 */

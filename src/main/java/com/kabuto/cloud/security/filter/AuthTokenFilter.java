@@ -49,7 +49,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            // 1. 检查是否为公开接口（免认证）
+            // 1. 放行 Swagger UI 静态资源和 API Docs
+            String uri = request.getRequestURI();
+            if (isSwaggerResource(uri)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 2. 检查是否为公开接口（免认证）
             if (isPublicEndpoint(request)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -100,6 +107,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             // 清理 ThreadLocal，防止线程池复用导致数据泄漏
             SecurityContext.clear();
         }
+    }
+
+    /**
+     * 判断当前请求是否为 Swagger 静态资源或 API Docs
+     */
+    private boolean isSwaggerResource(String uri) {
+        return uri.contains("/swagger-ui")
+            || uri.contains("/v3/api-docs")
+            || uri.contains("/swagger-resources");
     }
 
     /**

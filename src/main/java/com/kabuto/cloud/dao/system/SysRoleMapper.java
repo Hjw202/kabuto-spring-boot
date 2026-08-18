@@ -2,6 +2,8 @@ package com.kabuto.cloud.dao.system;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kabuto.cloud.entity.system.SysRole;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -32,4 +34,40 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
             "WHERE rm.role_id IN (${roleIds}) AND m.status = 1 AND m.deleted = 0 " +
             "AND m.rule IS NOT NULL AND m.rule != ''")
     List<String> selectMenuRulesByRoleIds(@Param("roleIds") String roleIds);
+
+    /**
+     * 查询角色关联的菜单ID列表
+     */
+    @Select("SELECT menu_id FROM sys_role_menu WHERE role_id = #{roleId}")
+    List<Long> selectMenuIdsByRoleId(@Param("roleId") Long roleId);
+
+    /**
+     * 查询角色关联的权限ID列表
+     */
+    @Select("SELECT permission_id FROM sys_role_permission WHERE role_id = #{roleId}")
+    List<Long> selectPermissionIdsByRoleId(@Param("roleId") Long roleId);
+
+    /**
+     * 插入角色-菜单关联
+     */
+    @Insert("INSERT INTO sys_role_menu (role_id, menu_id) VALUES (#{roleId}, #{menuId})")
+    int insertRoleMenu(@Param("roleId") Long roleId, @Param("menuId") Long menuId);
+
+    /**
+     * 删除角色的所有菜单关联
+     */
+    @Delete("DELETE FROM sys_role_menu WHERE role_id = #{roleId}")
+    int deleteRoleMenus(@Param("roleId") Long roleId);
+
+    /**
+     * 插入角色-权限关联
+     */
+    @Insert("INSERT INTO sys_role_permission (role_id, permission_id) VALUES (#{roleId}, #{permissionId})")
+    int insertRolePermission(@Param("roleId") Long roleId, @Param("permissionId") Long permissionId);
+
+    /**
+     * 删除角色的所有权限关联
+     */
+    @Delete("DELETE FROM sys_role_permission WHERE role_id = #{roleId}")
+    int deleteRolePermissions(@Param("roleId") Long roleId);
 }

@@ -19,7 +19,7 @@ import java.util.List;
 public class SysRole {
 
     /** 角色ID */
-    @TableId(value = "role_id", type = IdType.INPUT)
+    @TableId(value = "role_id", type = IdType.AUTO)
     private Long roleId;
 
     /** 角色名称 */
