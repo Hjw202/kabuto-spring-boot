@@ -1,4 +1,4 @@
-package com.kabuto.cloud.service.system;
+package com.kabuto.cloud.service.license;
 
 /**
  * ECDSA 签名服务接口

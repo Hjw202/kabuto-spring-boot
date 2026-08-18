@@ -1,6 +1,6 @@
-package com.kabuto.cloud.service.impl.system;
+package com.kabuto.cloud.service.impl.license;
 
-import com.kabuto.cloud.service.system.LicenseSignService;
+import com.kabuto.cloud.service.license.LicenseSignService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

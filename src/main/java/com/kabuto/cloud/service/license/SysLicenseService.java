@@ -1,9 +1,9 @@
-package com.kabuto.cloud.service.system;
+package com.kabuto.cloud.service.license;
 
 import com.kabuto.cloud.common.result.PageResult;
-import com.kabuto.cloud.dto.system.*;
-import com.kabuto.cloud.vo.system.LicenseActivateVO;
-import com.kabuto.cloud.vo.system.LicenseVO;
+import com.kabuto.cloud.dto.license.*;
+import com.kabuto.cloud.vo.license.LicenseActivateVO;
+import com.kabuto.cloud.vo.license.LicenseVO;
 
 /**
  * License 授权码服务接口

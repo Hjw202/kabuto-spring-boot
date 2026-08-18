@@ -1,13 +1,13 @@
-package com.kabuto.cloud.controller.system;
+package com.kabuto.cloud.controller.license;
 
 import com.kabuto.cloud.common.annotation.Public;
 import com.kabuto.cloud.common.annotation.RequirePermission;
 import com.kabuto.cloud.common.result.PageResult;
 import com.kabuto.cloud.common.result.R;
-import com.kabuto.cloud.dto.system.*;
-import com.kabuto.cloud.service.system.SysLicenseService;
-import com.kabuto.cloud.vo.system.LicenseActivateVO;
-import com.kabuto.cloud.vo.system.LicenseVO;
+import com.kabuto.cloud.dto.license.*;
+import com.kabuto.cloud.service.license.SysLicenseService;
+import com.kabuto.cloud.vo.license.LicenseActivateVO;
+import com.kabuto.cloud.vo.license.LicenseVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

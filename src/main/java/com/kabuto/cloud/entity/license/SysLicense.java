@@ -1,4 +1,4 @@
-package com.kabuto.cloud.entity.system;
+package com.kabuto.cloud.entity.license;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
